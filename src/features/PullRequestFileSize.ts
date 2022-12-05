@@ -1,14 +1,11 @@
 import { Context } from "probot";
 
 export const updatePullRequestWithFileSizeLabel = async (context: Context<"pull_request">) => {
-  console.log("update pull request");
   await removeLabelsFromPullRequest(context);
   await addLabelsToPullRequest(context);
 };
 
 const addLabelsToPullRequest = async (context: Context<"pull_request">) => {
-  console.log("add labels");
-
   const filesChanged = context.payload.pull_request.changed_files;
 
   await context.octokit.issues.addLabels({
@@ -19,20 +16,17 @@ const addLabelsToPullRequest = async (context: Context<"pull_request">) => {
   });
 };
 
-const removeLabelsFromPullRequest = async (
-  context: Context<"pull_request">
-) => {
-  console.log("remove labels");
+const removeLabelsFromPullRequest = async (context: Context<"pull_request">) => {
   const labels = await context.octokit.issues.listLabelsOnIssue({
     owner: context.payload.repository.owner.login,
     repo: context.payload.repository.name,
     issue_number: context.payload.number,
   });
 
-  const removeLabelRequests: Promise<any>[] = [];
+  const removeLabelRequests: Promise<unknown>[] = [];
   labels.data
-    .filter((label: any) => label.name.startsWith("files/"))
-    .forEach((label: any) => {
+    .filter(label => label.name.startsWith("files/"))
+    .forEach(label => {
       removeLabelRequests.push(
         context.octokit.issues.removeLabel({
           owner: context.payload.repository.owner.login,
