@@ -1,15 +1,15 @@
 import { Context } from "probot";
 
-export const updatePullRequestWithFileSizeLabel = async (context: Context<"pull_request">) => {
+export const updatePullRequestWithLinesChangedLabel = async (context: Context<"pull_request">) => {
   await removeLabelsFromPullRequest(context);
   await addLabelsToPullRequest(context);
 };
 
 const addLabelsToPullRequest = async (context: Context<"pull_request">) => {
-  const filesChanged = context.payload.pull_request.changed_files;
-
+  const linesChanged = getLinesChanged(context);
+  console.log("linesChanged", linesChanged);
   await context.octokit.issues.addLabels({
-    labels: [getFilesChangedLabel(filesChanged)],
+    labels: [getLinesChangedLabel(linesChanged)],
     owner: context.payload.repository.owner.login,
     repo: context.payload.repository.name,
     issue_number: context.payload.number,
@@ -17,7 +17,7 @@ const addLabelsToPullRequest = async (context: Context<"pull_request">) => {
 };
 
 const removeLabelsFromPullRequest = async (context: Context<"pull_request">) => {
-  const filesChanged = context.payload.pull_request.changed_files;
+  const linesChanged = getLinesChanged(context);
   const labels = await context.octokit.issues.listLabelsOnIssue({
     owner: context.payload.repository.owner.login,
     repo: context.payload.repository.name,
@@ -26,7 +26,7 @@ const removeLabelsFromPullRequest = async (context: Context<"pull_request">) => 
 
   const removeLabelRequests: Promise<unknown>[] = [];
   labels.data
-    .filter(label => label.name.startsWith("files/") && label.name !== getFilesChangedLabel(filesChanged))
+    .filter(label => label.name.startsWith("lines/") && label.name !== getLinesChangedLabel(linesChanged))
     .forEach(label => {
       removeLabelRequests.push(
         context.octokit.issues.removeLabel({
@@ -41,11 +41,15 @@ const removeLabelsFromPullRequest = async (context: Context<"pull_request">) => 
   await Promise.all(removeLabelRequests);
 };
 
-const getFilesChangedLabel = (filesChanged: number): string => {
-  if (filesChanged > 100) return "files/XXL";
-  if (filesChanged > 50) return "files/XL";
-  if (filesChanged > 25) return "files/L";
-  if (filesChanged > 10) return "files/M";
-  if (filesChanged > 5) return "files/S";
-  return "files/XS";
+function getLinesChanged(context: Context<"pull_request">): number {
+  return context.payload.pull_request.additions + context.payload.pull_request.deletions;
+}
+
+const getLinesChangedLabel = (linesChanged: number): string => {
+  if (linesChanged > 100) return "lines/XXL";
+  if (linesChanged > 50) return "lines/XL";
+  if (linesChanged > 25) return "lines/L";
+  if (linesChanged > 10) return "lines/M";
+  if (linesChanged > 5) return "lines/S";
+  return "lines/XS";
 };

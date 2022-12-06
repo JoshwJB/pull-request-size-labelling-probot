@@ -5,10 +5,13 @@
 
 ```sh
 # Install dependencies
-yarn install
+npm install
+
+# Build the bot
+npm run build
 
 # Run the bot
-yarn start
+npm run start
 ```
 
 ## Docker
