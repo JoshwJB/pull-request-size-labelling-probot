@@ -1,4 +1,4 @@
-name: "pull-request-size-probot"
+name: "Pull Request Size Labelling"
 description: "A GitHub App built with Probot for adding size labels to PRs"
 branding:
   icon: "git-pull-request"
