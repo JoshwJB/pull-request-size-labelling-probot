@@ -1,0 +1,21 @@
+name: Say Hello World
+"on":
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+jobs:
+  pull_request_size_labels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          cache: npm
+          node-version: 18
+      - run: npm ci
+      - run: npm run build
+      - uses: ./
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

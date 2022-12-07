@@ -1,6 +1,8 @@
 import { Context } from "probot";
 
-export const updatePullRequestWithLinesChangedLabel = async (context: Context<"pull_request">) => {
+export const updatePullRequestWithLinesChangedLabel = async (
+  context: Context<"pull_request">
+) => {
   await removeLabelsFromPullRequest(context);
   await addLabelsToPullRequest(context);
 };
@@ -16,7 +18,9 @@ const addLabelsToPullRequest = async (context: Context<"pull_request">) => {
   });
 };
 
-const removeLabelsFromPullRequest = async (context: Context<"pull_request">) => {
+const removeLabelsFromPullRequest = async (
+  context: Context<"pull_request">
+) => {
   const linesChanged = getLinesChanged(context);
   const labels = await context.octokit.issues.listLabelsOnIssue({
     owner: context.payload.repository.owner.login,
@@ -26,8 +30,12 @@ const removeLabelsFromPullRequest = async (context: Context<"pull_request">) => 
 
   const removeLabelRequests: Promise<unknown>[] = [];
   labels.data
-    .filter(label => label.name.startsWith("lines/") && label.name !== getLinesChangedLabel(linesChanged))
-    .forEach(label => {
+    .filter(
+      (label) =>
+        label.name.startsWith("lines/") &&
+        label.name !== getLinesChangedLabel(linesChanged)
+    )
+    .forEach((label) => {
       removeLabelRequests.push(
         context.octokit.issues.removeLabel({
           owner: context.payload.repository.owner.login,
@@ -42,7 +50,10 @@ const removeLabelsFromPullRequest = async (context: Context<"pull_request">) => 
 };
 
 function getLinesChanged(context: Context<"pull_request">): number {
-  return context.payload.pull_request.additions + context.payload.pull_request.deletions;
+  return (
+    context.payload.pull_request.additions +
+    context.payload.pull_request.deletions
+  );
 }
 
 const getLinesChangedLabel = (linesChanged: number): string => {

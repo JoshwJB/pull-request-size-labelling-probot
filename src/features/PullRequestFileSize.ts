@@ -1,6 +1,8 @@
 import { Context } from "probot";
 
-export const updatePullRequestWithFileSizeLabel = async (context: Context<"pull_request">) => {
+export const updatePullRequestWithFileSizeLabel = async (
+  context: Context<"pull_request">
+) => {
   await removeLabelsFromPullRequest(context);
   await addLabelsToPullRequest(context);
 };
@@ -16,7 +18,9 @@ const addLabelsToPullRequest = async (context: Context<"pull_request">) => {
   });
 };
 
-const removeLabelsFromPullRequest = async (context: Context<"pull_request">) => {
+const removeLabelsFromPullRequest = async (
+  context: Context<"pull_request">
+) => {
   const filesChanged = context.payload.pull_request.changed_files;
   const labels = await context.octokit.issues.listLabelsOnIssue({
     owner: context.payload.repository.owner.login,
@@ -26,8 +30,12 @@ const removeLabelsFromPullRequest = async (context: Context<"pull_request">) => 
 
   const removeLabelRequests: Promise<unknown>[] = [];
   labels.data
-    .filter(label => label.name.startsWith("files/") && label.name !== getFilesChangedLabel(filesChanged))
-    .forEach(label => {
+    .filter(
+      (label) =>
+        label.name.startsWith("files/") &&
+        label.name !== getFilesChangedLabel(filesChanged)
+    )
+    .forEach((label) => {
       removeLabelRequests.push(
         context.octokit.issues.removeLabel({
           owner: context.payload.repository.owner.login,
