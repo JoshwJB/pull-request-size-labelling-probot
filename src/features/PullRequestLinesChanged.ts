@@ -1,17 +1,21 @@
 import { Context } from "probot";
+import { getConfig } from "../shared/Config";
 
 export const updatePullRequestWithLinesChangedLabel = async (
   context: Context<"pull_request">
 ) => {
-  await removeLabelsFromPullRequest(context);
-  await addLabelsToPullRequest(context);
+  const linesChanged = getLinesChanged(context);
+  const label = await getLinesChangedLabel(linesChanged, context);
+
+  await Promise.all([
+    removeLabelsFromPullRequest(context, label),
+    addLabelsToPullRequest(context, label)
+  ])
 };
 
-const addLabelsToPullRequest = async (context: Context<"pull_request">) => {
-  const linesChanged = getLinesChanged(context);
-  console.log("linesChanged", linesChanged);
+const addLabelsToPullRequest = async (context: Context<"pull_request">, label: string) => {
   await context.octokit.issues.addLabels({
-    labels: [getLinesChangedLabel(linesChanged)],
+    labels: [label],
     owner: context.payload.repository.owner.login,
     repo: context.payload.repository.name,
     issue_number: context.payload.number,
@@ -19,21 +23,21 @@ const addLabelsToPullRequest = async (context: Context<"pull_request">) => {
 };
 
 const removeLabelsFromPullRequest = async (
-  context: Context<"pull_request">
+  context: Context<"pull_request">,
+  label: string
 ) => {
-  const linesChanged = getLinesChanged(context);
-  const labels = await context.octokit.issues.listLabelsOnIssue({
+  const existingLabels = await context.octokit.issues.listLabelsOnIssue({
     owner: context.payload.repository.owner.login,
     repo: context.payload.repository.name,
     issue_number: context.payload.number,
   });
 
   const removeLabelRequests: Promise<unknown>[] = [];
-  labels.data
+  existingLabels.data
     .filter(
-      (label) =>
-        label.name.startsWith("lines/") &&
-        label.name !== getLinesChangedLabel(linesChanged)
+      (existingLabel) =>
+        existingLabel.name.startsWith("lines/") &&
+        existingLabel.name !== label
     )
     .forEach((label) => {
       removeLabelRequests.push(
@@ -56,11 +60,13 @@ function getLinesChanged(context: Context<"pull_request">): number {
   );
 }
 
-const getLinesChangedLabel = (linesChanged: number): string => {
-  if (linesChanged > 100) return "lines/XXL";
-  if (linesChanged > 50) return "lines/XL";
-  if (linesChanged > 25) return "lines/L";
-  if (linesChanged > 10) return "lines/M";
-  if (linesChanged > 5) return "lines/S";
+async function getLinesChangedLabel(linesChanged: number, context: Context<"pull_request">): Promise<string> {
+  const {lines} = await getConfig(context);
+
+  if (linesChanged > lines.xxl) return "lines/XXL";
+  if (linesChanged > lines.xl) return "lines/XL";
+  if (linesChanged > lines.l) return "lines/L";
+  if (linesChanged > lines.m) return "lines/M";
+  if (linesChanged > lines.s) return "lines/S";
   return "lines/XS";
-};
+}

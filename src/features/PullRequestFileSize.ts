@@ -1,17 +1,21 @@
 import { Context } from "probot";
+import { getConfig } from "../shared/Config";
 
 export const updatePullRequestWithFileSizeLabel = async (
   context: Context<"pull_request">
 ) => {
-  await removeLabelsFromPullRequest(context);
-  await addLabelsToPullRequest(context);
+  const filesChanged = context.payload.pull_request.changed_files;
+  const label = await getFilesChangedLabel(filesChanged, context);
+
+  await Promise.all([
+    removeLabelsFromPullRequest(context, label),
+    addLabelsToPullRequest(context, label)
+  ]);
 };
 
-const addLabelsToPullRequest = async (context: Context<"pull_request">) => {
-  const filesChanged = context.payload.pull_request.changed_files;
-
+const addLabelsToPullRequest = async (context: Context<"pull_request">, label: string) => {
   await context.octokit.issues.addLabels({
-    labels: [getFilesChangedLabel(filesChanged)],
+    labels: [label],
     owner: context.payload.repository.owner.login,
     repo: context.payload.repository.name,
     issue_number: context.payload.number,
@@ -19,21 +23,21 @@ const addLabelsToPullRequest = async (context: Context<"pull_request">) => {
 };
 
 const removeLabelsFromPullRequest = async (
-  context: Context<"pull_request">
+  context: Context<"pull_request">, 
+  label: string
 ) => {
-  const filesChanged = context.payload.pull_request.changed_files;
-  const labels = await context.octokit.issues.listLabelsOnIssue({
+  const existingLabels = await context.octokit.issues.listLabelsOnIssue({
     owner: context.payload.repository.owner.login,
     repo: context.payload.repository.name,
     issue_number: context.payload.number,
   });
 
   const removeLabelRequests: Promise<unknown>[] = [];
-  labels.data
+  existingLabels.data
     .filter(
-      (label) =>
-        label.name.startsWith("files/") &&
-        label.name !== getFilesChangedLabel(filesChanged)
+      (existingLabel) =>
+        existingLabel.name.startsWith("files/") &&
+        existingLabel.name !== label
     )
     .forEach((label) => {
       removeLabelRequests.push(
@@ -49,11 +53,13 @@ const removeLabelsFromPullRequest = async (
   await Promise.all(removeLabelRequests);
 };
 
-const getFilesChangedLabel = (filesChanged: number): string => {
-  if (filesChanged > 100) return "files/XXL";
-  if (filesChanged > 50) return "files/XL";
-  if (filesChanged > 25) return "files/L";
-  if (filesChanged > 10) return "files/M";
-  if (filesChanged > 5) return "files/S";
+async function getFilesChangedLabel(filesChanged: number, context: Context<"pull_request">): Promise<string> {
+  const config = await getConfig(context);
+  
+  if (filesChanged > config.files.xxl) return "files/XXL";
+  if (filesChanged > config.files.xl) return "files/XL";
+  if (filesChanged > config.files.l) return "files/L";
+  if (filesChanged > config.files.m) return "files/M";
+  if (filesChanged > config.files.s) return "files/S";
   return "files/XS";
-};
+}

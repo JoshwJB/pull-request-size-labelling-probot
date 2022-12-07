@@ -21,6 +21,31 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+## Overriding the default config
+Add a new file under `.github/pullRequestSizing.yml` and add the config below to it, updating any values you wish to change.
+
+You can use the labels section to enable/disable the lines changed and files changed labelling independantly.
+
+```
+labels:
+    lines: true
+    files: true
+
+lines:
+    xxl: 1000
+    xl: 500
+    l: 250
+    m: 100
+    s: 20
+    
+files:
+    xxl: 60
+    xl: 40
+    l: 25
+    m: 10
+    s: 5
+```
+
 ## Setup
 
 ```sh
