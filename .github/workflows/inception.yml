@@ -6,7 +6,7 @@ name: Add size labels to pull request
       - reopened
       - synchronize
 jobs:
-  pull_request_size_labels:
+  addPullRequestSizeLabels:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
