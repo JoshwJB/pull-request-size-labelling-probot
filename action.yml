@@ -1,5 +1,8 @@
 name: "pull-request-size-probot"
 description: "A GitHub App built with Probot for adding size labels to PRs"
+branding:
+  icon: "git-pull-request"
+  color: purple
 runs:
   using: "node16"
-  main: "index.js"
+  main: "dist/index.js"
