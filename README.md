@@ -1,4 +1,4 @@
-# pull-request-size-probot (WIP)
+# pull-request-size-probot
 
 > A GitHub App built with [Probot](https://github.com/probot/probot) for adding size labels to PRs
 
