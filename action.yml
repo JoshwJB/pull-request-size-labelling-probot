@@ -6,3 +6,8 @@ branding:
 runs:
   using: "node16"
   main: "dist/index.js"
+inputs:
+  # Required
+  GITHUB_TOKEN:
+    description: GitHub token
+    requried: true
