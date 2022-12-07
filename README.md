@@ -22,6 +22,7 @@ jobs:
 ```
 
 ## Overriding the default config
+
 Add a new file under `.github/pullRequestSizing.yml` and add the config below to it, updating any values you wish to change.
 
 You can use the labels section to enable/disable the lines changed and files changed labelling independantly.
@@ -37,7 +38,7 @@ lines:
     l: 250
     m: 100
     s: 20
-    
+
 files:
     xxl: 60
     xl: 40

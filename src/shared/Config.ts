@@ -1,4 +1,4 @@
-import { Context } from 'probot';
+import { Context } from "probot";
 
 export interface Config {
   labels: Labels;
@@ -24,16 +24,16 @@ const defaultLinesSizing: Sizing = {
   xl: 500,
   l: 250,
   m: 100,
-  s: 20
-}
+  s: 20,
+};
 
 const defaultFilesSizing: Sizing = {
   xxl: 60,
   xl: 40,
   l: 25,
   m: 10,
-  s: 5
-}
+  s: 5,
+};
 
 const defaultConfig: Config = {
   labels: {
@@ -41,9 +41,14 @@ const defaultConfig: Config = {
     files: true,
   },
   lines: defaultLinesSizing,
-  files: defaultFilesSizing
-}
+  files: defaultFilesSizing,
+};
 
-export async function getConfig(context: Context<"pull_request">): Promise<Config> {
-  return await context.config('pullRequestSizing.yml', defaultConfig) as Config;
+export async function getConfig(
+  context: Context<"pull_request">
+): Promise<Config> {
+  return (await context.config(
+    "pullRequestSizing.yml",
+    defaultConfig
+  )) as Config;
 }

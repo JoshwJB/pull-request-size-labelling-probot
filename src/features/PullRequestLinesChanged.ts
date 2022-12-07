@@ -9,11 +9,14 @@ export const updatePullRequestWithLinesChangedLabel = async (
 
   await Promise.all([
     removeLabelsFromPullRequest(context, label),
-    addLabelsToPullRequest(context, label)
-  ])
+    addLabelsToPullRequest(context, label),
+  ]);
 };
 
-const addLabelsToPullRequest = async (context: Context<"pull_request">, label: string) => {
+const addLabelsToPullRequest = async (
+  context: Context<"pull_request">,
+  label: string
+) => {
   await context.octokit.issues.addLabels({
     labels: [label],
     owner: context.payload.repository.owner.login,
@@ -36,8 +39,7 @@ const removeLabelsFromPullRequest = async (
   existingLabels.data
     .filter(
       (existingLabel) =>
-        existingLabel.name.startsWith("lines/") &&
-        existingLabel.name !== label
+        existingLabel.name.startsWith("lines/") && existingLabel.name !== label
     )
     .forEach((label) => {
       removeLabelRequests.push(
@@ -60,8 +62,11 @@ function getLinesChanged(context: Context<"pull_request">): number {
   );
 }
 
-async function getLinesChangedLabel(linesChanged: number, context: Context<"pull_request">): Promise<string> {
-  const {lines} = await getConfig(context);
+async function getLinesChangedLabel(
+  linesChanged: number,
+  context: Context<"pull_request">
+): Promise<string> {
+  const { lines } = await getConfig(context);
 
   if (linesChanged > lines.xxl) return "lines/XXL";
   if (linesChanged > lines.xl) return "lines/XL";

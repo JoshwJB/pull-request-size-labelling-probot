@@ -9,11 +9,14 @@ export const updatePullRequestWithFileSizeLabel = async (
 
   await Promise.all([
     removeLabelsFromPullRequest(context, label),
-    addLabelsToPullRequest(context, label)
+    addLabelsToPullRequest(context, label),
   ]);
 };
 
-const addLabelsToPullRequest = async (context: Context<"pull_request">, label: string) => {
+const addLabelsToPullRequest = async (
+  context: Context<"pull_request">,
+  label: string
+) => {
   await context.octokit.issues.addLabels({
     labels: [label],
     owner: context.payload.repository.owner.login,
@@ -23,7 +26,7 @@ const addLabelsToPullRequest = async (context: Context<"pull_request">, label: s
 };
 
 const removeLabelsFromPullRequest = async (
-  context: Context<"pull_request">, 
+  context: Context<"pull_request">,
   label: string
 ) => {
   const existingLabels = await context.octokit.issues.listLabelsOnIssue({
@@ -36,8 +39,7 @@ const removeLabelsFromPullRequest = async (
   existingLabels.data
     .filter(
       (existingLabel) =>
-        existingLabel.name.startsWith("files/") &&
-        existingLabel.name !== label
+        existingLabel.name.startsWith("files/") && existingLabel.name !== label
     )
     .forEach((label) => {
       removeLabelRequests.push(
@@ -53,9 +55,12 @@ const removeLabelsFromPullRequest = async (
   await Promise.all(removeLabelRequests);
 };
 
-async function getFilesChangedLabel(filesChanged: number, context: Context<"pull_request">): Promise<string> {
+async function getFilesChangedLabel(
+  filesChanged: number,
+  context: Context<"pull_request">
+): Promise<string> {
   const config = await getConfig(context);
-  
+
   if (filesChanged > config.files.xxl) return "files/XXL";
   if (filesChanged > config.files.xl) return "files/XL";
   if (filesChanged > config.files.l) return "files/L";

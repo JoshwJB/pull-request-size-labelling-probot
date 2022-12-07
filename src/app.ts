@@ -24,8 +24,10 @@ async function updatePullRequest(
 
   const features: Promise<void>[] = [];
 
-  if (config.labels.files) features.push(updatePullRequestWithFileSizeLabel(context));
-  if (config.labels.lines) features.push(updatePullRequestWithLinesChangedLabel(context));
+  if (config.labels.files)
+    features.push(updatePullRequestWithFileSizeLabel(context));
+  if (config.labels.lines)
+    features.push(updatePullRequestWithLinesChangedLabel(context));
 
   await Promise.all(features);
 }
