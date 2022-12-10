@@ -18,22 +18,43 @@ async function createLabels(
   context: Context<"pull_request">
 ): Promise<void> {
   const labels = Object.values(LabelSuffix).map((suffix) => ({
-    label: `${labelSizeConfig.prefix}${suffix}`,
+    name: `${labelSizeConfig.prefix}${suffix}`,
     colour: labelSizeConfig.colours[suffix],
   }));
 
   const requests: Promise<unknown>[] = [];
 
-  labels.map(({ label, colour }) => {
-    requests.push(
-      context.octokit.issues.updateLabel({
-        name: label,
-        color: colour.replace("#", ""),
-        owner: context.payload.repository.owner.login,
-        repo: context.payload.repository.name,
-      })
-    );
+  labels.map(({ name, colour }) => {
+    requests.push(upsertLabel(context, name, colour));
   });
 
   await Promise.all(requests);
+}
+
+async function upsertLabel(
+  context: Context<"pull_request">,
+  name: string,
+  colour: string
+): Promise<void> {
+  const doesLabelAlreadyExist = await context.octokit.issues.getLabel({
+    name,
+    owner: context.payload.repository.owner.login,
+    repo: context.payload.repository.name,
+  });
+
+  if (doesLabelAlreadyExist.status === 200) {
+    await context.octokit.issues.updateLabel({
+      name,
+      color: colour.replace("#", ""),
+      owner: context.payload.repository.owner.login,
+      repo: context.payload.repository.name,
+    });
+  } else {
+    context.octokit.issues.createLabel({
+      name,
+      color: colour.replace("#", ""),
+      owner: context.payload.repository.owner.login,
+      repo: context.payload.repository.name,
+    });
+  }
 }
