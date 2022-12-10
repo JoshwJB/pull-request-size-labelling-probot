@@ -28,7 +28,7 @@ async function createLabels(
     requests.push(
       context.octokit.issues.updateLabel({
         name: label,
-        color: colour,
+        color: colour.replace("#", ""),
         owner: context.payload.repository.owner.login,
         repo: context.payload.repository.name,
       })
