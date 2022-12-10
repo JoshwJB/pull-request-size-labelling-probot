@@ -1,11 +1,11 @@
-# pull-request-size-probot
+# Pull Request Size Labelling Probot
 
 > A GitHub App built with [Probot](https://github.com/probot/probot) for adding size labels to PRs
 
 ## Usage via GitHub Actions
 
 ```
-name: "Pull Request Labelling"
+name: "Pull Request Size Labelling"
 on:
   pull_request:
     types:
@@ -16,7 +16,7 @@ jobs:
   addLabels:
     runs-on: ubuntu-latest
     steps:
-      - uses: JoshwJB/pull-request-size-probot@v1
+      - uses: JoshwJB/pull-request-size-labelling-probot@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
