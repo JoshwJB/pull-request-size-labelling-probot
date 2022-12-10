@@ -26,7 +26,7 @@ async function createLabels(
 
   labels.map(({ label, colour }) => {
     requests.push(
-      context.octokit.issues.createLabel({
+      context.octokit.issues.updateLabel({
         name: label,
         color: colour,
         owner: context.payload.repository.owner.login,
