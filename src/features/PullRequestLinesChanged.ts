@@ -68,10 +68,10 @@ async function getLinesChangedLabel(
 ): Promise<string> {
   const { lines } = await getConfig(context);
 
-  if (linesChanged > lines.xxl) return "lines/XXL";
-  if (linesChanged > lines.xl) return "lines/XL";
-  if (linesChanged > lines.l) return "lines/L";
-  if (linesChanged > lines.m) return "lines/M";
-  if (linesChanged > lines.s) return "lines/S";
-  return "lines/XS";
+  if (linesChanged > lines.sizing.xxl) return `${lines.prefix}/XXL`;
+  if (linesChanged > lines.sizing.xl) return `${lines.prefix}/XL`;
+  if (linesChanged > lines.sizing.l) return `${lines.prefix}/L`;
+  if (linesChanged > lines.sizing.m) return `${lines.prefix}/M`;
+  if (linesChanged > lines.sizing.s) return `${lines.prefix}/S`;
+  return `${lines.prefix}/XS`;
 }

@@ -59,12 +59,12 @@ async function getFilesChangedLabel(
   filesChanged: number,
   context: Context<"pull_request">
 ): Promise<string> {
-  const config = await getConfig(context);
+  const { files } = await getConfig(context);
 
-  if (filesChanged > config.files.xxl) return "files/XXL";
-  if (filesChanged > config.files.xl) return "files/XL";
-  if (filesChanged > config.files.l) return "files/L";
-  if (filesChanged > config.files.m) return "files/M";
-  if (filesChanged > config.files.s) return "files/S";
-  return "files/XS";
+  if (filesChanged > files.sizing.xxl) return `${files.prefix}/XXL`;
+  if (filesChanged > files.sizing.xl) return `${files.prefix}/XL`;
+  if (filesChanged > files.sizing.l) return `${files.prefix}/L`;
+  if (filesChanged > files.sizing.m) return `${files.prefix}/M`;
+  if (filesChanged > files.sizing.s) return `${files.prefix}/S`;
+  return `${files.prefix}/XS`;
 }

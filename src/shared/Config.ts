@@ -1,9 +1,10 @@
+import { DEFAULT_CONFIG } from "./DefaultConfig";
 import { Context } from "probot";
 
 export interface Config {
   labels: Labels;
-  lines: Sizing;
-  files: Sizing;
+  lines: LabelSizeConfig;
+  files: LabelSizeConfig;
 }
 
 interface Labels {
@@ -11,37 +12,27 @@ interface Labels {
   files: boolean;
 }
 
-interface Sizing {
-  xxl: number;
-  xl: number;
-  l: number;
-  m: number;
-  s: number;
+export interface LabelSizeConfig {
+  sizing: Sizes;
+  colours: SizeColours;
+  prefix: string;
 }
 
-const defaultLinesSizing: Sizing = {
-  xxl: 1000,
-  xl: 500,
-  l: 250,
-  m: 100,
-  s: 20,
+export enum LabelSuffix {
+  XXL = "xxl",
+  XL = "xl",
+  L = "l",
+  M = "m",
+  S = "s",
+  XS = "xs",
+}
+
+type Sizes = {
+  [key in Exclude<LabelSuffix, "xs">]: number;
 };
 
-const defaultFilesSizing: Sizing = {
-  xxl: 60,
-  xl: 40,
-  l: 25,
-  m: 10,
-  s: 5,
-};
-
-const defaultConfig: Config = {
-  labels: {
-    lines: true,
-    files: true,
-  },
-  lines: defaultLinesSizing,
-  files: defaultFilesSizing,
+type SizeColours = {
+  [key in LabelSuffix]: string;
 };
 
 export async function getConfig(
@@ -49,6 +40,6 @@ export async function getConfig(
 ): Promise<Config> {
   return (await context.config(
     "pullRequestSizing.yml",
-    defaultConfig
+    DEFAULT_CONFIG
   )) as Config;
 }

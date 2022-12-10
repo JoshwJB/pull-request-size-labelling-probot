@@ -2,6 +2,7 @@ import { updatePullRequestWithFileSizeLabel } from "./features/PullRequestFileSi
 import { Context, Probot } from "probot";
 import { updatePullRequestWithLinesChangedLabel } from "./features/PullRequestLinesChanged";
 import { getConfig } from "./shared/Config";
+import { setupLabels } from "./features/SetupLabels";
 
 export = (app: Probot) => {
   app.on("pull_request.opened", async (context) => {
@@ -22,7 +23,7 @@ async function updatePullRequest(
 ): Promise<void> {
   const config = await getConfig(context);
 
-  const features: Promise<void>[] = [];
+  const features: Promise<void>[] = [setupLabels(context)];
 
   if (config.labels.files)
     features.push(updatePullRequestWithFileSizeLabel(context));
