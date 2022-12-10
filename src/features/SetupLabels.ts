@@ -17,6 +17,10 @@ async function createLabels(
   labelSizeConfig: LabelSizeConfig,
   context: Context<"pull_request">
 ): Promise<void> {
+  const existingLabels = await context.octokit.issues.listLabelsForRepo({
+    owner: context.payload.repository.owner.login,
+    repo: context.payload.repository.name,
+  });
   const labels = Object.values(LabelSuffix).map((suffix) => ({
     name: `${labelSizeConfig.prefix}${suffix}`,
     colour: labelSizeConfig.colours[suffix],
@@ -25,7 +29,14 @@ async function createLabels(
   const requests: Promise<unknown>[] = [];
 
   labels.map(({ name, colour }) => {
-    requests.push(upsertLabel(context, name, colour));
+    requests.push(
+      upsertLabel(
+        context,
+        name,
+        colour,
+        !!existingLabels.data.find((label) => label.name === name)
+      )
+    );
   });
 
   await Promise.all(requests);
@@ -34,15 +45,10 @@ async function createLabels(
 async function upsertLabel(
   context: Context<"pull_request">,
   name: string,
-  colour: string
+  colour: string,
+  labelExists: boolean
 ): Promise<void> {
-  const doesLabelAlreadyExist = await context.octokit.issues.getLabel({
-    name,
-    owner: context.payload.repository.owner.login,
-    repo: context.payload.repository.name,
-  });
-
-  if (doesLabelAlreadyExist.status === 200) {
+  if (labelExists) {
     await context.octokit.issues.updateLabel({
       name,
       color: colour.replace("#", ""),

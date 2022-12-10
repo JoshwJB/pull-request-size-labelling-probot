@@ -21,13 +21,15 @@ export = (app: Probot) => {
 async function updatePullRequest(
   context: Context<"pull_request">
 ): Promise<void> {
-  const config = await getConfig(context);
+  const [{ labels }] = await Promise.all([
+    getConfig(context),
+    setupLabels(context),
+  ]);
 
-  const features: Promise<void>[] = [setupLabels(context)];
+  const features: Promise<void>[] = [];
 
-  if (config.labels.files)
-    features.push(updatePullRequestWithFileSizeLabel(context));
-  if (config.labels.lines)
+  if (labels.files) features.push(updatePullRequestWithFileSizeLabel(context));
+  if (labels.lines)
     features.push(updatePullRequestWithLinesChangedLabel(context));
 
   await Promise.all(features);
