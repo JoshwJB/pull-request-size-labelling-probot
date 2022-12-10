@@ -17,10 +17,6 @@ async function createLabels(
   labelSizeConfig: LabelSizeConfig,
   context: Context<"pull_request">
 ): Promise<void> {
-  const existingLabels = await context.octokit.issues.listLabelsForRepo({
-    owner: context.payload.repository.owner.login,
-    repo: context.payload.repository.name,
-  });
   const labels = Object.values(LabelSuffix).map((suffix) => ({
     name: `${labelSizeConfig.prefix}${suffix}`,
     colour: labelSizeConfig.colours[suffix],
@@ -29,14 +25,7 @@ async function createLabels(
   const requests: Promise<unknown>[] = [];
 
   labels.map(({ name, colour }) => {
-    requests.push(
-      upsertLabel(
-        context,
-        name,
-        colour,
-        !!existingLabels.data.find((label) => label.name === name)
-      )
-    );
+    requests.push(upsertLabel(context, name, colour));
   });
 
   await Promise.all(requests);
@@ -45,18 +34,18 @@ async function createLabels(
 async function upsertLabel(
   context: Context<"pull_request">,
   name: string,
-  colour: string,
-  labelExists: boolean
+  colour: string
 ): Promise<void> {
-  if (labelExists) {
-    await context.octokit.issues.updateLabel({
+  try {
+    await context.octokit.issues.createLabel({
       name,
       color: colour.replace("#", ""),
       owner: context.payload.repository.owner.login,
       repo: context.payload.repository.name,
     });
-  } else {
-    context.octokit.issues.createLabel({
+  } catch (error) {
+    console.info(`Label [${name}] already exists, updating instead.`);
+    await context.octokit.issues.updateLabel({
       name,
       color: colour.replace("#", ""),
       owner: context.payload.repository.owner.login,
