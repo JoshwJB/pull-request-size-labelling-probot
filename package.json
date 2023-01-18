@@ -14,7 +14,7 @@
   "scripts": {
     "build": "ncc build src/index.ts -o dist",
     "start": "tsc && probot run ./lib/index.js",
-    "test": "jest",
+    "test": "jest --watch",
     "lint": "eslint",
     "prettier": "prettier --write ."
   },
