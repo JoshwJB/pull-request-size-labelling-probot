@@ -18,6 +18,7 @@ const addLabelsToPullRequest = async (
   context: Context<"pull_request">,
   label: string
 ) => {
+  console.log(`Adding label: ${label}`);
   await context.octokit.issues.addLabels({
     labels: [label],
     owner: context.payload.repository.owner.login,
