@@ -6,7 +6,7 @@ name: Add size labels to pull request
       - reopened
       - synchronize
 jobs:
-  addPullRequestSizeLabels:
+  TestAndBuild:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,6 +15,7 @@ jobs:
           cache: npm
           node-version: 16
       - run: npm ci
+      - run: npm run test:ci
       - run: npm run build
       - uses: ./
         env:

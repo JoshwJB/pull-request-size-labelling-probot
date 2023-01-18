@@ -1,0 +1,14 @@
+name: "Pull Request Size Labelling"
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+jobs:
+  addLabels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: JoshwJB/pull-request-size-labelling-probot@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

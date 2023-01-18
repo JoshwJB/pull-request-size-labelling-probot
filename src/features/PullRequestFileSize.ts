@@ -1,14 +1,15 @@
 import { Context } from "probot";
-import { getConfig } from "../shared/Config";
+import { getConfig, LabelSizeConfig } from "../shared/Config";
 
 export const updatePullRequestWithFileSizeLabel = async (
   context: Context<"pull_request">
 ) => {
+  const { files } = await getConfig(context);
   const filesChanged = context.payload.pull_request.changed_files;
-  const label = await getFilesChangedLabel(filesChanged, context);
+  const label = getFilesChangedLabel(filesChanged, files);
 
   await Promise.all([
-    removeLabelsFromPullRequest(context, label),
+    removeLabelsFromPullRequest(context, label, files),
     addLabelsToPullRequest(context, label),
   ]);
 };
@@ -17,6 +18,7 @@ const addLabelsToPullRequest = async (
   context: Context<"pull_request">,
   label: string
 ) => {
+  console.log(`Adding label: ${label}`);
   await context.octokit.issues.addLabels({
     labels: [label],
     owner: context.payload.repository.owner.login,
@@ -27,7 +29,8 @@ const addLabelsToPullRequest = async (
 
 const removeLabelsFromPullRequest = async (
   context: Context<"pull_request">,
-  label: string
+  label: string,
+  filesConfig: LabelSizeConfig
 ) => {
   const existingLabels = await context.octokit.issues.listLabelsOnIssue({
     owner: context.payload.repository.owner.login,
@@ -39,7 +42,7 @@ const removeLabelsFromPullRequest = async (
   existingLabels.data
     .filter(
       (existingLabel) =>
-        existingLabel.name.startsWith("files/") && existingLabel.name !== label
+        existingLabel.name.startsWith(filesConfig.prefix) && existingLabel.name !== label
     )
     .forEach((label) => {
       removeLabelRequests.push(
@@ -55,16 +58,14 @@ const removeLabelsFromPullRequest = async (
   await Promise.all(removeLabelRequests);
 };
 
-async function getFilesChangedLabel(
+function getFilesChangedLabel(
   filesChanged: number,
-  context: Context<"pull_request">
-): Promise<string> {
-  const { files } = await getConfig(context);
-
-  if (filesChanged > files.sizing.xxl) return `${files.prefix}XXL`;
-  if (filesChanged > files.sizing.xl) return `${files.prefix}XL`;
-  if (filesChanged > files.sizing.l) return `${files.prefix}L`;
-  if (filesChanged > files.sizing.m) return `${files.prefix}M`;
-  if (filesChanged > files.sizing.s) return `${files.prefix}S`;
-  return `${files.prefix}XS`;
+  filesConfig: LabelSizeConfig
+): string {
+  if (filesChanged > filesConfig.sizing.xxl) return `${filesConfig.prefix}XXL`;
+  if (filesChanged > filesConfig.sizing.xl) return `${filesConfig.prefix}XL`;
+  if (filesChanged > filesConfig.sizing.l) return `${filesConfig.prefix}L`;
+  if (filesChanged > filesConfig.sizing.m) return `${filesConfig.prefix}M`;
+  if (filesChanged > filesConfig.sizing.s) return `${filesConfig.prefix}S`;
+  return `${filesConfig.prefix}XS`;
 }
