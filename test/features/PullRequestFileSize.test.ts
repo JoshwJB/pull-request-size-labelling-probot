@@ -1,6 +1,6 @@
 import * as target from "../../src/features/PullRequestFileSize";
-import { Context } from "probot";
-import { DEFAULT_CONFIG } from "../../src/shared/DefaultConfig";
+import {Context} from "probot";
+import {DEFAULT_CONFIG} from "../../src/shared/DefaultConfig";
 
 let listLabelsOnIssueMock: jest.Mock;
 let removeLabelMock: jest.Mock;
@@ -38,19 +38,19 @@ describe("pull request file size", () => {
     it(`should add label ${filesLabelPrefix}${expectedLabel} when changed files is ${changedFiles}`, async () => {
       listLabelsOnIssueMock.mockResolvedValue({data: []});
       const context = buildPullRequestContext(changedFiles);
-  
+
       await target.updatePullRequestWithFileSizeLabel(context);
-    
+
       expect(addLabelsMock).toHaveBeenCalledTimes(1);
       expect(addLabelsMock).toHaveBeenCalledWith({
         labels: [`${filesLabelPrefix}${expectedLabel}`],
         owner: "JoshwJB",
         repo: "TestRepo",
-        issue_number: 1
+        issue_number: 1,
       });
     });
   });
-  
+
   it("should delete existing files label if label has changed", async () => {
     const existingLabel = {name: `${filesLabelPrefix}XXL`};
     listLabelsOnIssueMock.mockResolvedValue({data: [existingLabel]});
@@ -63,7 +63,7 @@ describe("pull request file size", () => {
       name: existingLabel.name,
       owner: "JoshwJB",
       repo: "TestRepo",
-      issue_number: 1
+      issue_number: 1,
     });
   });
 
@@ -76,7 +76,7 @@ describe("pull request file size", () => {
 
     expect(removeLabelMock).not.toHaveBeenCalled();
   });
-  
+
   it("should not delete label if it doesn't have the files label prefix", async () => {
     const existingLabel = {name: `enhancement`};
     listLabelsOnIssueMock.mockResolvedValue({data: [existingLabel]});
@@ -97,9 +97,7 @@ describe("pull request file size", () => {
   });
 });
 
-function buildPullRequestContext(
-  changedFiles = 100
-): Context<"pull_request"> {
+function buildPullRequestContext(changedFiles = 100): Context<"pull_request"> {
   return {
     name: "pull_request",
     id: "",
@@ -109,19 +107,19 @@ function buildPullRequestContext(
       },
       repository: {
         owner: {
-          login: owner
+          login: owner,
         },
-        name: repo
+        name: repo,
       },
-      number: issueNumber
+      number: issueNumber,
     },
     octokit: {
       issues: {
         listLabelsOnIssue: listLabelsOnIssueMock,
         removeLabel: removeLabelMock,
-        addLabels: addLabelsMock
-      }
+        addLabels: addLabelsMock,
+      },
     },
-    config: configMock
+    config: configMock,
   } as unknown as Context<"pull_request">;
 }

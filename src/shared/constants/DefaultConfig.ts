@@ -1,4 +1,4 @@
-import { Config } from "../Config";
+import type {Config} from "../Config";
 
 export const DEFAULT_CONFIG: Config = {
   labels: {

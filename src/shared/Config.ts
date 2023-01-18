@@ -1,5 +1,5 @@
-import { DEFAULT_CONFIG } from "./DefaultConfig";
-import { Context } from "probot";
+import {DEFAULT_CONFIG} from "./constants/DefaultConfig";
+import {Context} from "probot";
 
 export interface Config {
   labels: Labels;
@@ -35,11 +35,6 @@ type SizeColours = {
   [key in LabelSuffix]: string;
 };
 
-export async function getConfig(
-  context: Context<"pull_request">
-): Promise<Config> {
-  return (await context.config(
-    "pullRequestSizing.yml",
-    DEFAULT_CONFIG
-  )) as Config;
+export async function getConfig(context: Context<"pull_request">): Promise<Config> {
+  return (await context.config("pullRequestSizing.yml", DEFAULT_CONFIG)) as Config;
 }

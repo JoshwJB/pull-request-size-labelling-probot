@@ -1,23 +1,15 @@
-import { Context } from "probot";
-import { getConfig, LabelSizeConfig } from "../shared/Config";
+import {Context} from "probot";
+import {getConfig, LabelSizeConfig} from "../shared/Config";
 
-export const updatePullRequestWithLinesChangedLabel = async (
-  context: Context<"pull_request">
-) => {
+export const updatePullRequestWithLinesChangedLabel = async (context: Context<"pull_request">) => {
   const linesChanged = getLinesChanged(context);
-  const { lines } = await getConfig(context);
+  const {lines} = await getConfig(context);
   const label = await getLinesChangedLabel(linesChanged, lines);
 
-  await Promise.all([
-    removeLabelsFromPullRequest(context, label, lines),
-    addLabelsToPullRequest(context, label),
-  ]);
+  await Promise.all([removeLabelsFromPullRequest(context, label, lines), addLabelsToPullRequest(context, label)]);
 };
 
-const addLabelsToPullRequest = async (
-  context: Context<"pull_request">,
-  label: string
-) => {
+const addLabelsToPullRequest = async (context: Context<"pull_request">, label: string) => {
   console.log(`Adding label: ${label}`);
   await context.octokit.issues.addLabels({
     labels: [label],
@@ -40,10 +32,7 @@ const removeLabelsFromPullRequest = async (
 
   const removeLabelRequests: Promise<unknown>[] = [];
   existingLabels.data
-    .filter(
-      (existingLabel) =>
-        existingLabel.name.startsWith(linesConfig.prefix) && existingLabel.name !== label
-    )
+    .filter((existingLabel) => existingLabel.name.startsWith(linesConfig.prefix) && existingLabel.name !== label)
     .forEach((label) => {
       removeLabelRequests.push(
         context.octokit.issues.removeLabel({
@@ -59,16 +48,10 @@ const removeLabelsFromPullRequest = async (
 };
 
 function getLinesChanged(context: Context<"pull_request">): number {
-  return (
-    context.payload.pull_request.additions +
-    context.payload.pull_request.deletions
-  );
+  return context.payload.pull_request.additions + context.payload.pull_request.deletions;
 }
 
-async function getLinesChangedLabel(
-  linesChanged: number,
-  linesConfig: LabelSizeConfig
-): Promise<string> {
+async function getLinesChangedLabel(linesChanged: number, linesConfig: LabelSizeConfig): Promise<string> {
   if (linesChanged > linesConfig.sizing.xxl) return `${linesConfig.prefix}XXL`;
   if (linesChanged > linesConfig.sizing.xl) return `${linesConfig.prefix}XL`;
   if (linesChanged > linesConfig.sizing.l) return `${linesConfig.prefix}L`;

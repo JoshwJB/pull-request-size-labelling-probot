@@ -1,22 +1,14 @@
-import { LabelSizeConfig, LabelSuffix } from "./../shared/Config";
-import { Context } from "probot";
-import { getConfig } from "../shared/Config";
+import {LabelSizeConfig, LabelSuffix} from "./../shared/Config";
+import {Context} from "probot";
+import {getConfig} from "../shared/Config";
 
-export async function setupLabels(
-  context: Context<"pull_request">
-): Promise<void> {
-  const { lines, files } = await getConfig(context);
+export async function setupLabels(context: Context<"pull_request">): Promise<void> {
+  const {lines, files} = await getConfig(context);
 
-  await Promise.all([
-    createLabels(lines, context),
-    createLabels(files, context),
-  ]);
+  await Promise.all([createLabels(lines, context), createLabels(files, context)]);
 }
 
-async function createLabels(
-  labelSizeConfig: LabelSizeConfig,
-  context: Context<"pull_request">
-): Promise<void> {
+async function createLabels(labelSizeConfig: LabelSizeConfig, context: Context<"pull_request">): Promise<void> {
   const labels = Object.values(LabelSuffix).map((suffix) => ({
     name: `${labelSizeConfig.prefix}${suffix}`,
     colour: labelSizeConfig.colours[suffix],
@@ -24,18 +16,14 @@ async function createLabels(
 
   const requests: Promise<unknown>[] = [];
 
-  labels.map(({ name, colour }) => {
+  labels.map(({name, colour}) => {
     requests.push(upsertLabel(context, name, colour));
   });
 
   await Promise.all(requests);
 }
 
-async function upsertLabel(
-  context: Context<"pull_request">,
-  name: string,
-  colour: string
-): Promise<void> {
+async function upsertLabel(context: Context<"pull_request">, name: string, colour: string): Promise<void> {
   try {
     await context.octokit.issues.createLabel({
       name,
