@@ -1,14 +1,15 @@
 import { Context } from "probot";
-import { getConfig } from "../shared/Config";
+import { getConfig, LabelSizeConfig } from "../shared/Config";
 
 export const updatePullRequestWithLinesChangedLabel = async (
   context: Context<"pull_request">
 ) => {
   const linesChanged = getLinesChanged(context);
-  const label = await getLinesChangedLabel(linesChanged, context);
+  const { lines } = await getConfig(context);
+  const label = await getLinesChangedLabel(linesChanged, lines);
 
   await Promise.all([
-    removeLabelsFromPullRequest(context, label),
+    removeLabelsFromPullRequest(context, label, lines),
     addLabelsToPullRequest(context, label),
   ]);
 };
@@ -27,7 +28,8 @@ const addLabelsToPullRequest = async (
 
 const removeLabelsFromPullRequest = async (
   context: Context<"pull_request">,
-  label: string
+  label: string,
+  linesConfig: LabelSizeConfig
 ) => {
   const existingLabels = await context.octokit.issues.listLabelsOnIssue({
     owner: context.payload.repository.owner.login,
@@ -39,7 +41,7 @@ const removeLabelsFromPullRequest = async (
   existingLabels.data
     .filter(
       (existingLabel) =>
-        existingLabel.name.startsWith("lines/") && existingLabel.name !== label
+        existingLabel.name.startsWith(linesConfig.prefix) && existingLabel.name !== label
     )
     .forEach((label) => {
       removeLabelRequests.push(
@@ -64,14 +66,12 @@ function getLinesChanged(context: Context<"pull_request">): number {
 
 async function getLinesChangedLabel(
   linesChanged: number,
-  context: Context<"pull_request">
+  linesConfig: LabelSizeConfig
 ): Promise<string> {
-  const { lines } = await getConfig(context);
-
-  if (linesChanged > lines.sizing.xxl) return `${lines.prefix}XXL`;
-  if (linesChanged > lines.sizing.xl) return `${lines.prefix}XL`;
-  if (linesChanged > lines.sizing.l) return `${lines.prefix}L`;
-  if (linesChanged > lines.sizing.m) return `${lines.prefix}M`;
-  if (linesChanged > lines.sizing.s) return `${lines.prefix}S`;
-  return `${lines.prefix}XS`;
+  if (linesChanged > linesConfig.sizing.xxl) return `${linesConfig.prefix}XXL`;
+  if (linesChanged > linesConfig.sizing.xl) return `${linesConfig.prefix}XL`;
+  if (linesChanged > linesConfig.sizing.l) return `${linesConfig.prefix}L`;
+  if (linesChanged > linesConfig.sizing.m) return `${linesConfig.prefix}M`;
+  if (linesChanged > linesConfig.sizing.s) return `${linesConfig.prefix}S`;
+  return `${linesConfig.prefix}XS`;
 }
