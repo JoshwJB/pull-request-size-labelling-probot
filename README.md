@@ -19,7 +19,7 @@ jobs:
   addLabels:
     runs-on: ubuntu-latest
     steps:
-      - uses: JoshwJB/pull-request-size-labelling-probot@v1
+      - uses: JoshwJB/pull-request-size-labelling-probot@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
