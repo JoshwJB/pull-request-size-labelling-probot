@@ -44,6 +44,12 @@ export default async function getFilesChanged(
     console.error("Failed to list PR files", error);
   }
 
+  console.log("pullRequestFiles", pullRequestFiles, pullRequestFiles.filter((file) =>
+    omitted
+      .map((regexString) => new RegExp(regexString))
+      .some((regex) => !regex.test(file.filename))
+  ));
+
   return pullRequestFiles.filter((file) =>
     omitted
       .map((regexString) => new RegExp(regexString))
