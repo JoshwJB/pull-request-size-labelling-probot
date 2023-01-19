@@ -35,8 +35,8 @@ export default async function getFilesChanged(
       pullRequestFiles.push(...result.data);
       page++;
     } while (
-      pullRequestFiles.length % filesPerPage !== 0 ||
-      pullRequestFiles.length >= maxFilesChanged
+      pullRequestFiles.length % filesPerPage === 0 &&
+      pullRequestFiles.length < maxFilesChanged
     );
   } catch (error) {
     // GitHub doesn't return whether or not there is a next page, the while should work in most cases
@@ -44,15 +44,9 @@ export default async function getFilesChanged(
     console.error("Failed to list PR files", error);
   }
 
-  console.log(
-    "pullRequestFiles",
-    pullRequestFiles,
-    pullRequestFiles.filter((file) =>
-      omitted.some((omitPattern) => new RegExp(omitPattern).test(file.filename))
-    )
-  );
-
   return pullRequestFiles.filter((file) =>
-    omitted.some((omitPattern) => new RegExp(omitPattern).test(file.filename))
+    omitted
+      .map((regexString) => new RegExp(regexString))
+      .some((regex) => !regex.test(file.filename))
   );
 }
