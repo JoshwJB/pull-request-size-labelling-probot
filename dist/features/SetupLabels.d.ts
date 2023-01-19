@@ -1,2 +1,3 @@
 import { Context } from "probot";
-export declare function setupLabels(context: Context<"pull_request">): Promise<void>;
+import { Config } from "../shared/Config";
+export declare function setupLabels(context: Context<"pull_request">, { lines, files }: Config): Promise<void>;

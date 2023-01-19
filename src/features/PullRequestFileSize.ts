@@ -1,10 +1,12 @@
 import {Context} from "probot";
 import addLabelsToPullRequest from "../shared/AddLabelsToPullRequest";
-import getConfig, {LabelSizeConfig} from "../shared/Config";
+import {Config, LabelSizeConfig} from "../shared/Config";
 import removePreviousSizeLabels from "../shared/RemovePreviousSizeLabels";
 
-export const updatePullRequestWithFileSizeLabel = async (context: Context<"pull_request">) => {
-  const {files} = await getConfig(context);
+export const updatePullRequestWithFileSizeLabel = async (
+  context: Context<"pull_request">,
+  {files}: Config
+) => {
   const filesChanged = context.payload.pull_request.changed_files;
   const label = getFilesChangedLabel(filesChanged, files);
 

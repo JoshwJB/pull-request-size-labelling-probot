@@ -3,22 +3,15 @@ import {Context} from "probot";
 import {DEFAULT_CONFIG} from "../../src/shared/constants/DefaultConfig";
 import removePreviousSizeLabels from "../../src/shared/RemovePreviousSizeLabels";
 import addLabelsToPullRequest from "../../src/shared/AddLabelsToPullRequest";
-import getConfig from "../../src/shared/Config";
 import {FILES_LABEL_PREFIX} from "../utils/Constants";
 
 jest.mock("../../src/shared/RemovePreviousSizeLabels");
 jest.mock("../../src/shared/AddLabelsToPullRequest");
-jest.mock("../../src/shared/Config");
 
 const mockedRemovePreviousSizeLabels = jest.mocked(removePreviousSizeLabels);
 const mockedAddLabelsToPullRequest = jest.mocked(addLabelsToPullRequest);
-const mockedGetConfig = jest.mocked(getConfig);
 
 describe("pull request file size", () => {
-  beforeEach(() => {
-    mockedGetConfig.mockResolvedValue(DEFAULT_CONFIG);
-  });
-
   [
     {expectedLabel: "XXL", changedFiles: 100},
     {expectedLabel: "XXL", changedFiles: 61},
@@ -36,7 +29,7 @@ describe("pull request file size", () => {
     it(`should add label ${FILES_LABEL_PREFIX}${expectedLabel} when changed files is ${changedFiles}`, async () => {
       const context = buildPullRequestContext(changedFiles);
 
-      await target.updatePullRequestWithFileSizeLabel(context);
+      await target.updatePullRequestWithFileSizeLabel(context, DEFAULT_CONFIG);
 
       expect(mockedAddLabelsToPullRequest).toHaveBeenCalledTimes(1);
       expect(mockedAddLabelsToPullRequest).toHaveBeenCalledWith(context, [
@@ -48,7 +41,7 @@ describe("pull request file size", () => {
   it("should call removePreviousSizeLabels", async () => {
     const context = buildPullRequestContext(1);
 
-    await target.updatePullRequestWithFileSizeLabel(context);
+    await target.updatePullRequestWithFileSizeLabel(context, DEFAULT_CONFIG);
 
     expect(mockedRemovePreviousSizeLabels).toHaveBeenCalledTimes(1);
     expect(mockedRemovePreviousSizeLabels).toHaveBeenCalledWith(

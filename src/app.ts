@@ -19,12 +19,13 @@ export = (app: Probot) => {
 };
 
 async function updatePullRequest(context: Context<"pull_request">): Promise<void> {
-  const [{labels}] = await Promise.all([getConfig(context), setupLabels(context)]);
+  const config = await getConfig(context);
+  await Promise.all([setupLabels(context, config)]);
 
   const features: Promise<void>[] = [];
 
-  if (labels.files) features.push(updatePullRequestWithFileSizeLabel(context));
-  if (labels.lines) features.push(updatePullRequestWithLinesChangedLabel(context));
+  if (config.labels.files) features.push(updatePullRequestWithFileSizeLabel(context, config));
+  if (config.labels.lines) features.push(updatePullRequestWithLinesChangedLabel(context, config));
 
   await Promise.all(features);
 }
