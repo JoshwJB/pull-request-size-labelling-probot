@@ -1,24 +1,22 @@
 import * as target from "../../src/features/PullRequestFileSize";
-import { Context } from "probot";
-import { DEFAULT_CONFIG } from "../../src/shared/DefaultConfig";
+import {Context} from "probot";
+import {DEFAULT_CONFIG} from "../../src/shared/constants/DefaultConfig";
+import removePreviousSizeLabels from "../../src/shared/RemovePreviousSizeLabels";
+import addLabelsToPullRequest from "../../src/shared/AddLabelsToPullRequest";
+import getConfig from "../../src/shared/Config";
+import {FILES_LABEL_PREFIX} from "../utils/Constants";
 
-let listLabelsOnIssueMock: jest.Mock;
-let removeLabelMock: jest.Mock;
-let addLabelsMock: jest.Mock;
-let configMock: jest.Mock;
+jest.mock("../../src/shared/RemovePreviousSizeLabels");
+jest.mock("../../src/shared/AddLabelsToPullRequest");
+jest.mock("../../src/shared/Config");
 
-const repo = "TestRepo";
-const owner = "JoshwJB";
-const issueNumber = 1;
-const filesLabelPrefix = DEFAULT_CONFIG.files.prefix;
+const mockedRemovePreviousSizeLabels = jest.mocked(removePreviousSizeLabels);
+const mockedAddLabelsToPullRequest = jest.mocked(addLabelsToPullRequest);
+const mockedGetConfig = jest.mocked(getConfig);
 
 describe("pull request file size", () => {
   beforeEach(() => {
-    listLabelsOnIssueMock = jest.fn();
-    removeLabelMock = jest.fn();
-    addLabelsMock = jest.fn();
-    configMock = jest.fn();
-    configMock.mockResolvedValue(DEFAULT_CONFIG);
+    mockedGetConfig.mockResolvedValue(DEFAULT_CONFIG);
   });
 
   [
@@ -35,71 +33,33 @@ describe("pull request file size", () => {
     {expectedLabel: "XS", changedFiles: 5},
     {expectedLabel: "XS", changedFiles: 1},
   ].forEach(({expectedLabel, changedFiles}) => {
-    it(`should add label ${filesLabelPrefix}${expectedLabel} when changed files is ${changedFiles}`, async () => {
-      listLabelsOnIssueMock.mockResolvedValue({data: []});
+    it(`should add label ${FILES_LABEL_PREFIX}${expectedLabel} when changed files is ${changedFiles}`, async () => {
       const context = buildPullRequestContext(changedFiles);
-  
+
       await target.updatePullRequestWithFileSizeLabel(context);
-    
-      expect(addLabelsMock).toHaveBeenCalledTimes(1);
-      expect(addLabelsMock).toHaveBeenCalledWith({
-        labels: [`${filesLabelPrefix}${expectedLabel}`],
-        owner: "JoshwJB",
-        repo: "TestRepo",
-        issue_number: 1
-      });
-    });
-  });
-  
-  it("should delete existing files label if label has changed", async () => {
-    const existingLabel = {name: `${filesLabelPrefix}XXL`};
-    listLabelsOnIssueMock.mockResolvedValue({data: [existingLabel]});
-    const context = buildPullRequestContext(1);
 
-    await target.updatePullRequestWithFileSizeLabel(context);
-
-    expect(removeLabelMock).toHaveBeenCalledTimes(1);
-    expect(removeLabelMock).toHaveBeenCalledWith({
-      name: existingLabel.name,
-      owner: "JoshwJB",
-      repo: "TestRepo",
-      issue_number: 1
+      expect(mockedAddLabelsToPullRequest).toHaveBeenCalledTimes(1);
+      expect(mockedAddLabelsToPullRequest).toHaveBeenCalledWith(context, [
+        `${FILES_LABEL_PREFIX}${expectedLabel}`,
+      ]);
     });
   });
 
-  it("should not delete existing files label if label is the same", async () => {
-    const existingLabel = {name: `${filesLabelPrefix}XS`};
-    listLabelsOnIssueMock.mockResolvedValue({data: [existingLabel]});
+  it("should call removePreviousSizeLabels", async () => {
     const context = buildPullRequestContext(1);
 
     await target.updatePullRequestWithFileSizeLabel(context);
 
-    expect(removeLabelMock).not.toHaveBeenCalled();
-  });
-  
-  it("should not delete label if it doesn't have the files label prefix", async () => {
-    const existingLabel = {name: `enhancement`};
-    listLabelsOnIssueMock.mockResolvedValue({data: [existingLabel]});
-    const context = buildPullRequestContext(1);
-
-    await target.updatePullRequestWithFileSizeLabel(context);
-
-    expect(removeLabelMock).not.toHaveBeenCalled();
-  });
-
-  it("should not remove labels if none exist", async () => {
-    listLabelsOnIssueMock.mockResolvedValue({data: []});
-    const context = buildPullRequestContext(1);
-
-    await target.updatePullRequestWithFileSizeLabel(context);
-
-    expect(removeLabelMock).not.toHaveBeenCalled();
+    expect(mockedRemovePreviousSizeLabels).toHaveBeenCalledTimes(1);
+    expect(mockedRemovePreviousSizeLabels).toHaveBeenCalledWith(
+      context,
+      `${FILES_LABEL_PREFIX}XS`,
+      DEFAULT_CONFIG.files
+    );
   });
 });
 
-function buildPullRequestContext(
-  changedFiles = 100
-): Context<"pull_request"> {
+function buildPullRequestContext(changedFiles = 100): Context<"pull_request"> {
   return {
     name: "pull_request",
     id: "",
@@ -107,21 +67,6 @@ function buildPullRequestContext(
       pull_request: {
         changed_files: changedFiles,
       },
-      repository: {
-        owner: {
-          login: owner
-        },
-        name: repo
-      },
-      number: issueNumber
     },
-    octokit: {
-      issues: {
-        listLabelsOnIssue: listLabelsOnIssueMock,
-        removeLabel: removeLabelMock,
-        addLabels: addLabelsMock
-      }
-    },
-    config: configMock
   } as unknown as Context<"pull_request">;
 }

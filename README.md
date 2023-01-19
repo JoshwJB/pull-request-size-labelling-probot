@@ -4,7 +4,6 @@
 
 ![image](https://user-images.githubusercontent.com/15612025/211660283-0bdc2226-9628-4237-a718-772cbc44ace6.png)
 
-
 ## Usage via GitHub Actions
 
 ```
