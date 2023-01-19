@@ -27,5 +27,5 @@ type Sizes = {
 type SizeColours = {
     [key in LabelSuffix]: string;
 };
-export declare function getConfig(context: Context<"pull_request">): Promise<Config>;
+export default function getConfig(context: Context<"pull_request">): Promise<Config>;
 export {};

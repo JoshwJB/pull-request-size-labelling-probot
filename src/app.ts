@@ -1,7 +1,7 @@
 import {updatePullRequestWithFileSizeLabel} from "./features/PullRequestFileSize";
 import {Context, Probot} from "probot";
 import {updatePullRequestWithLinesChangedLabel} from "./features/PullRequestLinesChanged";
-import {getConfig} from "./shared/Config";
+import getConfig from "./shared/Config";
 import {setupLabels} from "./features/SetupLabels";
 
 export = (app: Probot) => {

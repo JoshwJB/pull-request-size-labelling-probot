@@ -35,6 +35,6 @@ type SizeColours = {
   [key in LabelSuffix]: string;
 };
 
-export async function getConfig(context: Context<"pull_request">): Promise<Config> {
+export default async function getConfig(context: Context<"pull_request">): Promise<Config> {
   return (await context.config("pullRequestSizing.yml", DEFAULT_CONFIG)) as Config;
 }
