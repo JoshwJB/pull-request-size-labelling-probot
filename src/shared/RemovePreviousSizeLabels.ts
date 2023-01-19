@@ -19,6 +19,7 @@ export default async function removePreviousSizeLabels(
         existingLabel.name.startsWith(config.prefix) && existingLabel.name !== label
     )
     .forEach((label) => {
+      console.log("Removing label:", label);
       removeLabelRequests.push(
         context.octokit.issues.removeLabel({
           owner: context.payload.repository.owner.login,

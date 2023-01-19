@@ -4,12 +4,15 @@ import {DEFAULT_CONFIG} from "../../src/shared/constants/DefaultConfig";
 import removePreviousSizeLabels from "../../src/shared/RemovePreviousSizeLabels";
 import addLabelsToPullRequest from "../../src/shared/AddLabelsToPullRequest";
 import {LINES_LABEL_PREFIX} from "../utils/Constants";
+import getFilesChanged from "../../src/shared/GetFilesChanged";
 
 jest.mock("../../src/shared/RemovePreviousSizeLabels");
 jest.mock("../../src/shared/AddLabelsToPullRequest");
+jest.mock("../../src/shared/GetFilesChanged");
 
 const mockedRemovePreviousSizeLabels = jest.mocked(removePreviousSizeLabels);
 const mockedAddLabelsToPullRequest = jest.mocked(addLabelsToPullRequest);
+const mockedGetFilesChanged = jest.mocked(getFilesChanged);
 
 describe("pull request file size", () => {
   [
@@ -51,6 +54,17 @@ describe("pull request file size", () => {
       `${LINES_LABEL_PREFIX}XS`,
       DEFAULT_CONFIG.lines
     );
+  });
+
+  it("should call getFilesChanged when omitted exists", async () => {
+    mockedGetFilesChanged.mockResolvedValue([]);
+    const context = buildPullRequestContext(1, 1);
+    const config = Object.assign(DEFAULT_CONFIG, {features: {omitted: ["Test"]}});
+
+    await target.updatePullRequestWithLinesChangedLabel(context, config);
+
+    expect(mockedGetFilesChanged).toHaveBeenCalledTimes(1);
+    expect(mockedGetFilesChanged).toHaveBeenCalledWith(context, config.features.omitted);
   });
 });
 
