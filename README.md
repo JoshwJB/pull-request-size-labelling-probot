@@ -30,41 +30,42 @@ Add a new file under `.github/pullRequestSizing.yml` and add the config below to
 You can use the labels section to enable/disable the lines changed and files changed labelling independantly.
 
 ```
-labels:
+labels: # Control which labels are enabled
     lines: true
     files: true
+    omitted: [] # Define any regexs for files/directories you wish to omit from being counter e.g. ".*.yarn/.*" will prevent any changes in the yarn folder from being counted
 
-lines:
-    sizing:
+lines: # Config for lines labels
+    sizing: # Define lines changed breakpoints e.g. lines changed > 1000 is XXL
         xxl: 1000
         xl: 500
         l: 250
         m: 100
         s: 20
-    colours:
+    colours: # Set label colours for each size
         xxl: "#25066C"
         xl: "#3709A1"
         l: "#4A0CD6"
         m: "#8B5CF6"
         s: "#C2A9FA"
         xs: "#DED0FC"
-    prefix: "lines/"
+    prefix: "lines/" # Change the prefix for the label e.g. "líneas/"
 
-files:
-    sizing:
+files: # Config for files labels
+    sizing: # Define files changed breakpoints e.g. files changed > 60 is XXL
         xxl: 60
         xl: 40
         l: 25
         m: 10
         s: 5
-    colours:
+    colours: # Set label colours for each size
         xxl: "#542E03"
         xl: "#854E05"
         l: "#E79609"
         m: "#F8C345"
         s: "#FADB76"
         xs: "#FBE58E"
-    prefix: "files/"
+    prefix: "files/" # Change the prefix for the label e.g. "archivos/"
 ```
 
 ## License

@@ -1,13 +1,14 @@
 import {Context} from "probot";
 import addLabelsToPullRequest from "../shared/AddLabelsToPullRequest";
 import {Config, LabelSizeConfig} from "../shared/Config";
+import getFilesChanged from "../shared/GetFilesChanged";
 import removePreviousSizeLabels from "../shared/RemovePreviousSizeLabels";
 
 export const updatePullRequestWithLinesChangedLabel = async (
   context: Context<"pull_request">,
-  {lines}: Config
+  {lines, features}: Config
 ) => {
-  const linesChanged = getLinesChanged(context);
+  const linesChanged = await getLinesChanged(context, features.omitted);
   const label = await getLinesChangedLabel(linesChanged, lines);
 
   await Promise.all([
@@ -16,8 +17,16 @@ export const updatePullRequestWithLinesChangedLabel = async (
   ]);
 };
 
-function getLinesChanged(context: Context<"pull_request">): number {
-  return context.payload.pull_request.additions + context.payload.pull_request.deletions;
+async function getLinesChanged(
+  context: Context<"pull_request">,
+  omitted: string[]
+): Promise<number> {
+  if (omitted.length === 0) {
+    return context.payload.pull_request.additions + context.payload.pull_request.deletions;
+  }
+
+  const filesChanged = await getFilesChanged(context, omitted);
+  return filesChanged.map((file) => file.changes).reduce((partialSum, a) => partialSum + a, 0);
 }
 
 async function getLinesChangedLabel(
