@@ -1,11 +1,13 @@
 import {Context} from "probot";
 import addLabelsToPullRequest from "../shared/AddLabelsToPullRequest";
-import getConfig, {LabelSizeConfig} from "../shared/Config";
+import {Config, LabelSizeConfig} from "../shared/Config";
 import removePreviousSizeLabels from "../shared/RemovePreviousSizeLabels";
 
-export const updatePullRequestWithLinesChangedLabel = async (context: Context<"pull_request">) => {
+export const updatePullRequestWithLinesChangedLabel = async (
+  context: Context<"pull_request">,
+  {lines}: Config
+) => {
   const linesChanged = getLinesChanged(context);
-  const {lines} = await getConfig(context);
   const label = await getLinesChangedLabel(linesChanged, lines);
 
   await Promise.all([

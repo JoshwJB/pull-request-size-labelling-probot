@@ -1,2 +1,3 @@
 import { Context } from "probot";
-export declare const updatePullRequestWithFileSizeLabel: (context: Context<"pull_request">) => Promise<void>;
+import { Config } from "../shared/Config";
+export declare const updatePullRequestWithFileSizeLabel: (context: Context<"pull_request">, { files }: Config) => Promise<void>;

@@ -1,10 +1,11 @@
 import {LabelSizeConfig, LabelSuffix} from "./../shared/Config";
 import {Context} from "probot";
-import getConfig from "../shared/Config";
+import {Config} from "../shared/Config";
 
-export async function setupLabels(context: Context<"pull_request">): Promise<void> {
-  const {lines, files} = await getConfig(context);
-
+export async function setupLabels(
+  context: Context<"pull_request">,
+  {lines, files}: Config
+): Promise<void> {
   await Promise.all([createLabels(lines, context), createLabels(files, context)]);
 }
 
