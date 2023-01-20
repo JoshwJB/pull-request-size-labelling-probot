@@ -16,7 +16,8 @@ export default async function removePreviousSizeLabels(
   existingLabels.data
     .filter(
       (existingLabel) =>
-        existingLabel.name.startsWith(config.prefix) && existingLabel.name !== label
+        existingLabel.name.toLowerCase().startsWith(config.prefix.toLowerCase()) &&
+        existingLabel.name.toLowerCase() !== label.toLowerCase()
     )
     .forEach((label) => {
       console.log("Removing label:", label);
