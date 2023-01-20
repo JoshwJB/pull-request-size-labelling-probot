@@ -31,7 +31,6 @@ async function calculateFilesChanged(
   omitted: string[]
 ): Promise<number> {
   if (omitted.length === 0) {
-    console.log("No omitted exists, returning without querying for files changed.")
     return context.payload.pull_request.changed_files;
   }
 

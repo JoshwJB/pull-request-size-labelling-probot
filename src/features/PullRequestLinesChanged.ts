@@ -22,7 +22,6 @@ async function getLinesChanged(
   omitted: string[]
 ): Promise<number> {
   if (omitted.length === 0) {
-    console.log("No omitted exists, returning without querying for files changed.")
     return context.payload.pull_request.additions + context.payload.pull_request.deletions;
   }
 
