@@ -18,6 +18,7 @@ export default async function getFilesChanged(
   context: Context<"pull_request">,
   omitted: string[]
 ): Promise<PullRequestFile[]> {
+  console.log("getFilesChanged started");
   const filesPerPage = 100;
   const maxFilesChanged = 3000; // GitHub has a limit of 3000 files before it stops tracking
   const pullRequestFiles: PullRequestFile[] = [];
@@ -50,13 +51,20 @@ export default async function getFilesChanged(
     pullRequestFiles.filter((file) =>
       omitted
         .map((regexString) => new RegExp(regexString))
-        .some((regex) => !regex.test(file.filename))
+        .every((regex) => !regex.test(file.filename))
     )
   );
 
   return pullRequestFiles.filter((file) =>
     omitted
       .map((regexString) => new RegExp(regexString))
-      .some((regex) => !regex.test(file.filename))
+      .every((regex) => !regex.test(stripGithubUrlFromPath(file.raw_url, context)))
+  );
+}
+
+function stripGithubUrlFromPath(path: string, context: Context<"pull_request">): string {
+  return path.replace(
+    `.*github.com/${context.payload.repository.owner.login}/${context.payload.repository.name}/raw/`,
+    ""
   );
 }
