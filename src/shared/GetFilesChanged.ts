@@ -47,13 +47,7 @@ export default async function getFilesChanged(
   return pullRequestFiles.filter((file) =>
     omitted
       .map((regexString) => new RegExp(regexString))
-      .every((regex) => !regex.test(stripGithubUrlFromPath(file.raw_url, context)))
+      .every((regex) => !regex.test(file.filename))
   );
 }
 
-function stripGithubUrlFromPath(path: string, context: Context<"pull_request">): string {
-  return path.replace(
-    `.*github.com/${context.payload.repository.owner.login}/${context.payload.repository.name}/raw/`,
-    ""
-  );
-}
