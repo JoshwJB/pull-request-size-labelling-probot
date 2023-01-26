@@ -1,4 +1,4 @@
-labels: # Control which labels are enabled
+features: # Control which labels are enabled
   lines: true
   files: true
   omitted: [".*dist/.*", ".*package-lock.json", ".*.github/.*"] # Define any regexs for files/directories you wish to omit from being counter e.g. ".*.yarn/.*" will prevent any changes in the yarn folder from being counted

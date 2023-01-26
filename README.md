@@ -30,7 +30,7 @@ Add a new file under `.github/pullRequestSizing.yml` and add the config below to
 You can use the labels section to enable/disable the lines changed and files changed labelling independantly.
 
 ```
-labels: # Control which labels are enabled
+features: # Control which labels are enabled
     lines: true
     files: true
     omitted: [] # Define any regexs for files/directories you wish to omit from being counter e.g. ".*.yarn/.*" will prevent any changes in the yarn folder from being counted
