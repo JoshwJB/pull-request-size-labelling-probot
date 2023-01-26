@@ -2,14 +2,15 @@ import {DEFAULT_CONFIG} from "./constants/DefaultConfig";
 import {Context} from "probot";
 
 export interface Config {
-  labels: Labels;
+  features: Features;
   lines: LabelSizeConfig;
   files: LabelSizeConfig;
 }
 
-interface Labels {
+interface Features {
   lines: boolean;
   files: boolean;
+  omitted: string[];
 }
 
 export interface LabelSizeConfig {

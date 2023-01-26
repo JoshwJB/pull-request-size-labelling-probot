@@ -1,9 +1,10 @@
 import type {Config} from "../Config";
 
 export const DEFAULT_CONFIG: Config = {
-  labels: {
+  features: {
     lines: true,
     files: true,
+    omitted: [],
   },
   lines: {
     sizing: {

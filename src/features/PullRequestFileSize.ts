@@ -1,13 +1,14 @@
 import {Context} from "probot";
 import addLabelsToPullRequest from "../shared/AddLabelsToPullRequest";
 import {Config, LabelSizeConfig} from "../shared/Config";
+import getFilesChanged from "../shared/GetFilesChanged";
 import removePreviousSizeLabels from "../shared/RemovePreviousSizeLabels";
 
 export const updatePullRequestWithFileSizeLabel = async (
   context: Context<"pull_request">,
-  {files}: Config
+  {files, features}: Config
 ) => {
-  const filesChanged = context.payload.pull_request.changed_files;
+  const filesChanged = await calculateFilesChanged(context, features.omitted);
   const label = getFilesChangedLabel(filesChanged, files);
 
   await Promise.all([
@@ -23,4 +24,16 @@ function getFilesChangedLabel(filesChanged: number, filesConfig: LabelSizeConfig
   if (filesChanged > filesConfig.sizing.m) return `${filesConfig.prefix}M`;
   if (filesChanged > filesConfig.sizing.s) return `${filesConfig.prefix}S`;
   return `${filesConfig.prefix}XS`;
+}
+
+async function calculateFilesChanged(
+  context: Context<"pull_request">,
+  omitted: string[]
+): Promise<number> {
+  if (omitted.length === 0) {
+    return context.payload.pull_request.changed_files;
+  }
+
+  const filesChanged = await getFilesChanged(context, omitted);
+  return filesChanged.length;
 }
