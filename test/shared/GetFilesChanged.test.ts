@@ -56,6 +56,6 @@ describe("get files changed", () => {
 
 function buildPullRequestFile(directory = "src/"): PullRequestFile {
   return {
-    raw_url: `https://github.com/${OWNER}/${REPOSITORY}/raw/${directory}${uuid()}`,
+    filename: `${directory}${uuid()}`,
   } as PullRequestFile;
 }
