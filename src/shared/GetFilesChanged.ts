@@ -18,7 +18,6 @@ export default async function getFilesChanged(
   context: Context<"pull_request">,
   omitted: string[]
 ): Promise<PullRequestFile[]> {
-  console.log("getting files changed");
   const filesPerPage = 100;
   const maxFilesChanged = 3000; // GitHub has a limit of 3000 files before it stops tracking
   const pullRequestFiles: PullRequestFile[] = [];
@@ -44,12 +43,6 @@ export default async function getFilesChanged(
     // and this catch handle any cases where the total number of files changed is divisible by 100
     console.error("Failed to list PR files", error);
   }
-
-  console.log("prefiltering", pullRequestFiles.length);
-  console.log("post filtering", pullRequestFiles.filter((file) =>
-  omitted
-    .map((regexString) => new RegExp(regexString))
-    .every((regex) => !regex.test(file.filename))).length);
 
   return pullRequestFiles.filter((file) =>
     omitted

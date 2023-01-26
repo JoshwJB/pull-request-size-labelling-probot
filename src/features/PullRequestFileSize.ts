@@ -30,13 +30,10 @@ async function calculateFilesChanged(
   context: Context<"pull_request">,
   omitted: string[]
 ): Promise<number> {
-  console.log("omitted", omitted);
   if (omitted.length === 0) {
-    console.log("omitted.length === 0", omitted);
     return context.payload.pull_request.changed_files;
   }
 
   const filesChanged = await getFilesChanged(context, omitted);
-  console.log("filesChanged", filesChanged);
   return filesChanged.length;
 }
