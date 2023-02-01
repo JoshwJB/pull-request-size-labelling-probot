@@ -8,6 +8,7 @@ interface Features {
     lines: boolean;
     files: boolean;
     omitted: string[];
+    createLabels: boolean;
 }
 export interface LabelSizeConfig {
     sizing: Sizes;
