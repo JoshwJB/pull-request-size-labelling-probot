@@ -34,6 +34,7 @@ features: # Control which labels are enabled
     lines: true
     files: true
     omitted: [] # Define any regexs for files/directories you wish to omit from being counter e.g. ".*.yarn/.*" will prevent any changes in the yarn folder from being counted
+    createLabels: true # Enable this only the first time, then change it to false
 
 lines: # Config for lines labels
     sizing: # Define lines changed breakpoints e.g. lines changed > 1000 is XXL
