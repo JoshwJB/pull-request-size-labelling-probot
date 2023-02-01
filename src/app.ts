@@ -27,12 +27,15 @@ async function updatePullRequest(context: Context<"pull_request">): Promise<void
     changedFiles = await getFilesChanged(context, config.features.omitted);
   }
 
-  const features: Promise<void>[] = [setupLabels(context, config)];
+  const features: Promise<void>[] = [];
 
-  if (config.features.files)
+  if (config.features.createLabels) features.push(setupLabels(context, config));
+  if (config.features.files) {
     features.push(updatePullRequestWithFileSizeLabel(context, config, changedFiles));
-  if (config.features.lines)
+  }
+  if (config.features.lines) {
     features.push(updatePullRequestWithLinesChangedLabel(context, config, changedFiles));
+  }
 
   await Promise.all(features);
 }
