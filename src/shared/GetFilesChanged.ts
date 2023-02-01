@@ -50,4 +50,3 @@ export default async function getFilesChanged(
       .every((regex) => !regex.test(file.filename))
   );
 }
-

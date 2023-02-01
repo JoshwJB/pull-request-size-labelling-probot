@@ -5,7 +5,7 @@ export const DEFAULT_CONFIG: Config = {
     lines: true,
     files: true,
     omitted: [],
-    createLabels: false
+    createLabels: false,
   },
   lines: {
     sizing: {

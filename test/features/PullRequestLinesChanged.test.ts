@@ -4,15 +4,13 @@ import {DEFAULT_CONFIG} from "../../src/shared/constants/DefaultConfig";
 import removePreviousSizeLabels from "../../src/shared/RemovePreviousSizeLabels";
 import addLabelsToPullRequest from "../../src/shared/AddLabelsToPullRequest";
 import {LINES_LABEL_PREFIX} from "../utils/Constants";
-import getFilesChanged from "../../src/shared/GetFilesChanged";
+import {PullRequestFile} from "../../src/shared/GetFilesChanged";
 
 jest.mock("../../src/shared/RemovePreviousSizeLabels");
 jest.mock("../../src/shared/AddLabelsToPullRequest");
-jest.mock("../../src/shared/GetFilesChanged");
 
 const mockedRemovePreviousSizeLabels = jest.mocked(removePreviousSizeLabels);
 const mockedAddLabelsToPullRequest = jest.mocked(addLabelsToPullRequest);
-const mockedGetFilesChanged = jest.mocked(getFilesChanged);
 
 describe("pull request file size", () => {
   [
@@ -34,7 +32,7 @@ describe("pull request file size", () => {
     }`, async () => {
       const context = buildPullRequestContext(additions, deletions);
 
-      await target.updatePullRequestWithLinesChangedLabel(context, DEFAULT_CONFIG);
+      await target.updatePullRequestWithLinesChangedLabel(context, DEFAULT_CONFIG, false);
 
       expect(mockedAddLabelsToPullRequest).toHaveBeenCalledTimes(1);
       expect(mockedAddLabelsToPullRequest).toHaveBeenCalledWith(context, [
@@ -46,7 +44,7 @@ describe("pull request file size", () => {
   it("should call removePreviousSizeLabels", async () => {
     const context = buildPullRequestContext(1, 1);
 
-    await target.updatePullRequestWithLinesChangedLabel(context, DEFAULT_CONFIG);
+    await target.updatePullRequestWithLinesChangedLabel(context, DEFAULT_CONFIG, false);
 
     expect(mockedRemovePreviousSizeLabels).toHaveBeenCalledTimes(1);
     expect(mockedRemovePreviousSizeLabels).toHaveBeenCalledWith(
@@ -57,14 +55,15 @@ describe("pull request file size", () => {
   });
 
   it("should call getFilesChanged when omitted exists", async () => {
-    mockedGetFilesChanged.mockResolvedValue([]);
     const context = buildPullRequestContext(1, 1);
-    const config = Object.assign(DEFAULT_CONFIG, {features: {omitted: ["Test"]}});
+    const pullRequestFile = {changes: 1001} as PullRequestFile;
 
-    await target.updatePullRequestWithLinesChangedLabel(context, config);
+    await target.updatePullRequestWithLinesChangedLabel(context, DEFAULT_CONFIG, [pullRequestFile]);
 
-    expect(mockedGetFilesChanged).toHaveBeenCalledTimes(1);
-    expect(mockedGetFilesChanged).toHaveBeenCalledWith(context, config.features.omitted);
+    expect(mockedAddLabelsToPullRequest).toHaveBeenCalledTimes(1);
+    expect(mockedAddLabelsToPullRequest).toHaveBeenCalledWith(context, [
+      `${LINES_LABEL_PREFIX}XXL`,
+    ]);
   });
 });
 
